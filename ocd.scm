@@ -10,13 +10,18 @@
 
 (define ocd-root-directory (make-parameter (current-directory)))
 (define ocd-delay (make-parameter 2))
-(define ocd-run-command (make-parameter "csc ocd.scm"))
+(define ocd-run-command (make-parameter "make"))
 (define ocd-filename-filter (make-parameter '("*.scm")))
 
 (define (print-exception exn)
   (print "Exception:"
          ((condition-property-accessor 'exn 'message) exn)
          ((condition-property-accessor 'exn 'arguments) exn)))
+
+(define (load-ocdrc)
+  (let ([ocd-file ".ocdrc"])
+    (if (file-exists? ocd-file)
+        (load ocd-file))))
 
 (define-syntax with-directory
   (syntax-rules ()
@@ -65,6 +70,7 @@
 
 (define (files-changed files)
   (print "Running: " (ocd-run-command))
-  (process-run (ocd-run-command)))
+  (print "Status:" (system (ocd-run-command))))
                                         ; (print (hash-table->alist (compile-files-list (current-directory))))
+(load-ocdrc)
 (main-loop (compile-files-list (ocd-root-directory)))
