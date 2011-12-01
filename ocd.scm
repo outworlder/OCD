@@ -10,11 +10,20 @@
 
 (define ocd-root-directory (make-parameter (current-directory)))
 (define ocd-delay (make-parameter 2))
+(define ocd-run-command (make-parameter "csc ocd.scm"))
+(define ocd-filename-filter (make-parameter '("*.scm")))
 
 (define (print-exception exn)
   (print "Exception:"
          ((condition-property-accessor 'exn 'message) exn)
          ((condition-property-accessor 'exn 'arguments) exn)))
+
+(define-syntax with-directory
+  (syntax-rules ()
+    ([_ directory forms...] (let ([cd (current-directory)])
+                                  (change-directory directory)
+                                  forms...
+                                  (change-directory cd)))))
 
 (define (compile-files-list path)
   (let ([ht (make-hash-table string= string-hash 100)])
@@ -24,13 +33,14 @@
 (define (walk-directories! ht path)
   ;(print "Entering directory" path)
   (if (directory? path)  ;; Stop condition
-      (let ([listing (directory path)])
-        (for-each (lambda (d)
-                    (handle-exceptions exn (print-exception exn)  ; Print the exception, ignore the file and continue.
-                                       (let ([absolute-path (normalize-pathname (make-absolute-pathname path d))])
-                                         (if (directory? absolute-path)
-                                             (walk-directories! ht absolute-path)
-                                             (hash-table-set! ht absolute-path (file-modification-time absolute-path)))))) listing))
+      (with-directory path
+                      (let ([listing (apply glob (ocd-filename-filter))])
+                        (for-each (lambda (d)
+                                    (handle-exceptions exn (print-exception exn) ; Print the exception, ignore the file and continue.
+                                                       (let ([absolute-path (normalize-pathname (make-absolute-pathname path d))])
+                                                         (if (directory? absolute-path)
+                                                             (walk-directories! ht absolute-path)
+                                                             (hash-table-set! ht absolute-path (file-modification-time absolute-path)))))) listing)))
       path))
 
 ;;; Walk the trees and return files that have been modified.
@@ -48,8 +58,13 @@
   (let ([after (compile-files-list (ocd-root-directory))])
     (let ([modified (get-modified before after)])
       (unless (null? modified)
-        (print "Files changed: " (get-modified before after))))
+        (begin
+          (print "Files changed: " modified)
+          (files-changed modified))))
     (main-loop after)))
 
+(define (files-changed files)
+  (print "Running: " (ocd-run-command))
+  (process-run (ocd-run-command)))
                                         ; (print (hash-table->alist (compile-files-list (current-directory))))
 (main-loop (compile-files-list (ocd-root-directory)))
