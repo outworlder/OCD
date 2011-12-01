@@ -4,9 +4,14 @@
 
 (use files)                             ; Files and pathname operations
 (use posix)
-(use srfi-69)                           ;Hash tables
+(use srfi-69)                           ; Hash tables
 
 (define ocd-root-directory (make-parameter (current-directory)))
+
+(define (print-exception exn)
+  (print "Exception:"
+         ((condition-property-accessor 'exn 'message) exn)
+         ((condition-property-accessor 'exn 'arguments) exn)))
 
 (define (compile-files-list path)
   (let ([ht (make-hash-table string= string-hash 100)])
@@ -18,12 +23,10 @@
   (if (directory? path)  ;; Stop condition 
       (let ([listing (directory path)])
         (for-each (lambda (d)
-                    (handle-exceptions exn (begin
-                                             (print exn)
-                                             '()) 
+                    (handle-exceptions exn (print-exception exn)  ; Print the exception, ignore the file and continue.
                                        (let ([absolute-path (normalize-pathname (make-absolute-pathname path d))])
                                          (if (directory? absolute-path)
-                                             (walk-directories ht absolute-path)
+                                             (walk-directories! ht absolute-path)
                                              (hash-table-set! ht absolute-path (file-modification-time absolute-path)))))) listing))
       path))
 
