@@ -9,7 +9,7 @@
 
 
 (define ocd-root-directory (make-parameter (current-directory)))
-(define ocd-delay (make-parameter 1000))
+(define ocd-delay (make-parameter 2))
 
 (define (print-exception exn)
   (print "Exception:"
@@ -44,7 +44,7 @@
                                   #f))))))
 
 (define (main-loop before)
-  (sleep 2)
+  (sleep (ocd-delay))
   (let ([after (compile-files-list (ocd-root-directory))])
     (let ([modified (get-modified before after)])
       (unless (null? modified)
