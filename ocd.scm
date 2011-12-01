@@ -5,6 +5,8 @@
 (use files)                             ; Files and pathname operations
 (use posix)
 (use srfi-69)                           ; uHash tables
+(use srfi-1)
+
 
 (define ocd-root-directory (make-parameter (current-directory)))
 (define ocd-delay (make-parameter 1000))
@@ -21,7 +23,7 @@
 
 (define (walk-directories! ht path)
   ;(print "Entering directory" path)
-  (if (directory? path)  ;; Stop condition 
+  (if (directory? path)  ;; Stop condition
       (let ([listing (directory path)])
         (for-each (lambda (d)
                     (handle-exceptions exn (print-exception exn)  ; Print the exception, ignore the file and continue.
@@ -33,17 +35,21 @@
 
 ;;; Walk the trees and return files that have been modified.
 (define (get-modified before after)
-  (hash-table-map before
-                  (lambda (file before-date)
-                    (let ([after-date (hash-table-ref after key)])
-                      (if (not (eq? before-date after-date))
-                          file)))))
+  (filter (lambda (x) (not (eqv? #f x)))
+          (hash-table-map before
+                          (lambda (file before-date)
+                            (let ([after-date (hash-table-ref after file)])
+                              (if (not (eqv? before-date after-date))
+                                  file
+                                  #f))))))
 
-(define (main-loop)
-  (let ([before (compile-files-list (ocd-root-directory))])
-    (sleep 1000)
-    (let ([after (compile-files-list (ocd-root-directory))])
-      (print (get-modified before after)))))
+(define (main-loop before)
+  (sleep 2)
+  (let ([after (compile-files-list (ocd-root-directory))])
+    (let ([modified (get-modified before after)])
+      (unless (null? modified)
+        (print "Files changed: " (get-modified before after))))
+    (main-loop after)))
 
                                         ; (print (hash-table->alist (compile-files-list (current-directory))))
-(main-loop)
+(main-loop (compile-files-list (ocd-root-directory)))
