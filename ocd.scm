@@ -4,9 +4,10 @@
 
 (use files)                             ; Files and pathname operations
 (use posix)
-(use srfi-69)                           ; Hash tables
+(use srfi-69)                           ; uHash tables
 
 (define ocd-root-directory (make-parameter (current-directory)))
+(define ocd-delay (make-parameter 1000))
 
 (define (print-exception exn)
   (print "Exception:"
@@ -32,6 +33,17 @@
 
 ;;; Walk the trees and return files that have been modified.
 (define (get-modified before after)
-  #f)
+  (hash-table-map before
+                  (lambda (file before-date)
+                    (let ([after-date (hash-table-ref after key)])
+                      (if (not (eq? before-date after-date))
+                          file)))))
 
-(print (hash-table->alist (compile-files-list (current-directory))))
+(define (main-loop)
+  (let ([before (compile-files-list (ocd-root-directory))])
+    (sleep 1000)
+    (let ([after (compile-files-list (ocd-root-directory))])
+      (print (get-modified before after)))))
+
+                                        ; (print (hash-table->alist (compile-files-list (current-directory))))
+(main-loop)
