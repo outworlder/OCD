@@ -50,7 +50,7 @@
 
 ;;; Walk the trees and return files that have been modified.
 (define (get-modified before after)
-  (filter (lambda (x) (not (eqv? #f x)))
+  (filter (lambda (x) (not (eqv? #f x))) ; Returns everything that is not #f. eqv compact in Ruby.
           (hash-table-map before
                           (lambda (file before-date)
                             (let ([after-date (hash-table-ref after file)])
