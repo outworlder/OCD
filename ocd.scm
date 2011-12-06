@@ -54,7 +54,7 @@
                                                                (hash-table-set! ht absolute-path (file-modification-time absolute-path)))))) listing)))
         path))
 
-;;; Walk the trees and return files that have been modified.
+;;; Walk the hash and return files that have been modified.
   (define (get-modified before after)
     (filter (lambda (x) (not (eqv? #f x))) ; Returns everything that is not #f. eqv compact in Ruby.
             (hash-table-map before
@@ -78,7 +78,6 @@
   (define (files-changed files)
     (print "Running: " (ocd-run-command))
     (print "Status:" (system (ocd-run-command))))
-                                        ; (print (hash-table->alist (compile-files-list (current-directory))))
 
   (define (set-control/c-handler!)
     (let self ()
