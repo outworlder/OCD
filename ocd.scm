@@ -10,12 +10,14 @@
    ) 
 ;;; Get the file listing
   (import scheme chicken)
-  (use files posix srfi-69 srfi-1 srfi-13)
+  (use files posix srfi-69 srfi-1 srfi-13 srfi-18)
 
   (define ocd-root-directory (make-parameter (current-directory)))
   (define ocd-delay (make-parameter 2))
   (define ocd-run-command (make-parameter "make"))
   (define ocd-filename-filter (make-parameter '("*.scm")))
+  (define last-control/c 0)
+  (define force-run? #f)
 
   (define (print-exception exn)
     (print "Exception:"
@@ -66,9 +68,10 @@
     (sleep (ocd-delay))
     (let ([after (compile-files-list (ocd-root-directory))])
       (let ([modified (get-modified before after)])
-        (unless (null? modified)
+        (if (or force-run? (not (null? modified)))
           (begin
             (print "Files changed: " modified)
+            (set! force-run? #f)
             (files-changed modified))))
       (main-loop after)))
 
@@ -77,6 +80,21 @@
     (print "Status:" (system (ocd-run-command))))
                                         ; (print (hash-table->alist (compile-files-list (current-directory))))
 
+  (define (set-control/c-handler!)
+    (let self ()
+      (set-signal-handler! signal/int
+                           (lambda (sig)
+                             (set-signal-handler! signal/int
+                                                  (lambda (sig)
+                                                    (print "Terminating due to user request.")
+                                                    (exit 0)))
+                             (print "Control+C pressed. Press it again within two seconds to interrupt")
+                             (sleep 2)
+                             (print "Running the build again.")
+                             (set! force-run? #t)
+                             (self)))))
+  
   (define (ocd-start!)
+    (set-control/c-handler!)
     (main-loop (compile-files-list (ocd-root-directory))))
 )
