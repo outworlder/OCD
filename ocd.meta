@@ -1,0 +1,6 @@
+(
+ (license "BSD")
+ (category testing)
+ (author "Stephen Pedrosa Eilert")
+ (synopsis "autotest-like for scheme")
+ )

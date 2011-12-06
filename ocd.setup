@@ -1,0 +1,15 @@
+(define version "0.1")
+
+(compile -s -O2 -d1 -S ocd.scm -j ocd)
+(compile -s -O2 -d0 ocd.import.scm)
+(compile -o ocd -O2 -d1 ocd-cmd.scm)
+
+(install-extension
+ "OCD"
+ '("ocd.so" "ocd.import.so")
+ `((version ,version)))
+
+(install-program
+ 'ocd-cmd
+ '("ocd")
+ `((version ,version)))
