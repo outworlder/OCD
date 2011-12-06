@@ -8,7 +8,7 @@
    ocd-start!
    ocd-load-ocdrc
    ) 
-;;; Get the file listing
+
   (import scheme chicken)
   (use files posix srfi-69 srfi-1 srfi-13 srfi-18)
 
