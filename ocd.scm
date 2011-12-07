@@ -46,12 +46,13 @@
     (if (directory? path)               ;; Stop condition
         (with-directory path
                         (let ([listing (apply glob (ocd-filename-filter))])
-                          (for-each (lambda (d)
-                                      (handle-exceptions exn (print-exception exn) ; Print the exception, ignore the file and continue.
-                                                         (let ([absolute-path (normalize-pathname (make-absolute-pathname path d))])
-                                                           (if (directory? absolute-path)
-                                                               (walk-directories! ht absolute-path)
-                                                               (hash-table-set! ht absolute-path (file-modification-time absolute-path)))))) listing)))
+                          (for-each
+                           (lambda (d)
+                             (handle-exceptions exn (print-exception exn) ; Print the exception, ignore the file and continue.
+                                                (let ([absolute-path (normalize-pathname (make-absolute-pathname path d))])
+                                                  (if (directory? absolute-path)
+                                                      (walk-directories! ht absolute-path)
+                                                      (hash-table-set! ht absolute-path (file-modification-time absolute-path)))))) listing)))
         path))
 
 ;;; Walk the hash and return files that have been modified.
