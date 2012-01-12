@@ -10,13 +10,13 @@ This file should be placed at the root of the project that it should operate on.
 
 The following is a list of parameters available for customization (so far):
 
-* ocd-rood-directory
+* _ocd-rood-directory_
    The directory OCD will begin with. Note that it will recursively scan for files inside this subdirectory. Also note, the recursive scan is currently broken. Default is the current directory.
-* ocd-delay
+* _ocd-delay_
    Delay between checks (default is 2 seconds). This will be made irrelevant if a notification library is used in the future
-* ocd-run-command
+* _ocd-run-command_
    The command to be run. Defaults to "make"
-* ocd-filename-filter
+* _ocd-filename-filter_
    List of 'globs' to look for. Default is '("*.scm")
    
 # TODO
