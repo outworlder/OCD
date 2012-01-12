@@ -4,7 +4,9 @@ OCD is an egg that continuously scans the filesystem for changes and, if any are
 
 This behaviour can be customized with a .ocdrc file.
 
-# ocdrc
+# .ocdrc
+
+This file should be placed at the root of the project that it should operate on.
 
 The following is a list of parameters available for customization (so far):
 
