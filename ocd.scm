@@ -1,4 +1,4 @@
-;;; OCD - Egg for running tests repeatedly.
+;;; OCD - Egg for running tests whenever files get changed.
 
 (module ocd
   (ocd-filename-filter
