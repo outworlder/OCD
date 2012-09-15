@@ -19,10 +19,19 @@ The following is a list of parameters available for customization (so far):
 * _ocd-filename-filter_
    List of 'globs' to look for. Default is '("*.scm")
 
+# Example .ocdrc:
+
+    (require-extension ocd)
+    (import ocd)
+
+    (print "Loading the awesome ocdrc")
+    (ocd-run-command "csi -b ./tests/tests.scm")
+    (ocd-filename-filter '("*.scm" "*.system" "tests"))
+    (print (ocd-filename-filter))
+
 # TODO
 
   - Add support for fsevent or inotify, in order to improve performance (stop polling!)
-  - Document the .ocdrc file
   - Create a default .ocdrc generator
   - Fix filesystem scanning bugs
   - Upload it to Chicken's official repository
